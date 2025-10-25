@@ -1,3 +1,4 @@
+
 export interface User {
   id: number;
   name: string; // Full Name
@@ -9,6 +10,20 @@ export interface User {
   followers: number;
   following: number;
   university?: string;
+  isActive: boolean;
+  followingIds: number[];
+  blockedUserIds: number[];
+  joinedCommunities: string[];
+  isAdmin?: boolean;
+}
+
+export interface Comment {
+  id: number;
+  author: User;
+  text: string;
+  timestamp: string;
+  likes: number;
+  likedBy: number[];
 }
 
 export interface Post {
@@ -18,9 +33,14 @@ export interface Post {
   review: string;
   rating: number;
   likes: number;
-  commentsCount: number;
-  timestamp: string;
+  comments: Comment[];
+  timestamp:string;
   likedBy: number[];
+  imageUrls?: string[];
+  linkUrl?: string;
+  field: string;
+  isCommunityPost: boolean;
+  repostOf?: Post;
 }
 
 export interface Course {
@@ -30,6 +50,14 @@ export interface Course {
   rating: number;
   platform: string;
   imageUrl: string;
+  description: string;
+  ownerId?: number;
+}
+
+export interface RoadmapResource {
+  name: string;
+  type: 'Book' | 'YouTube' | 'Course' | 'Post';
+  postId?: number;
 }
 
 export interface RoadmapStep {
@@ -37,17 +65,40 @@ export interface RoadmapStep {
   stage: string;
   title: string;
   description: string;
-  resources: {
-    name: string;
-    type: 'Book' | 'YouTube' | 'Course';
-  }[];
+  resources: RoadmapResource[];
 }
 
-export interface ChatMessage {
+export interface Roadmap {
+  title: string;
+  description: string;
+  steps: RoadmapStep[];
+}
+
+export type Roadmaps = { [key: string]: Roadmap };
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswerIndex: number;
+}
+
+export interface QuizAttempt extends QuizQuestion {
+  userAnswerIndex?: number;
+  isCorrect?: boolean;
+}
+
+
+export type Theme = 'light' | 'dark';
+
+export type Page = 'landing' | 'home' | 'discover' | 'roadmap' | 'profile' | 'about' | 'privacy' | 'terms' | 'support' | 'community' | 'admin';
+
+export type NotificationType = 'comment' | 'follow' | 'like';
+
+export interface Notification {
   id: number;
-  sender: User;
-  text: string;
+  type: NotificationType;
+  user: User;
+  post?: Post;
   timestamp: string;
+  read: boolean;
 }
-
-export type Page = 'landing' | 'home' | 'discover' | 'roadmap' | 'profile' | 'about' | 'privacy' | 'terms' | 'support';

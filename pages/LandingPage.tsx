@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView, animate } from 'framer-motion';
 import Button from '../components/GlowButton';
-import { MailIcon, LockIcon, ProfileIcon, BookIcon, StarIcon, UsersIcon, Logo } from '../components/icons';
+import { MailIcon, LockIcon, ProfileIcon, BookIcon, StarIcon, UsersIcon, Logo, CheckCheckIcon } from '../components/icons';
 import { User, Page } from '../types';
 
 type UserSignUpData = Omit<User, 'id' | 'avatarUrl' | 'followers' | 'following' | 'studyYear'> & {
@@ -36,7 +36,7 @@ const AuthInputField = ({ label, icon: Icon, type, placeholder, value, onChange,
     </div>
 );
 
-const SignInForm = ({ onLogin, switchToSignup }) => {
+const SignInForm = ({ onLogin, switchToSignup, switchToForgot }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -59,7 +59,7 @@ const SignInForm = ({ onLogin, switchToSignup }) => {
                         <input type="checkbox" className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-[#14F195] focus:ring-[#14F195]"/>
                         Remember me
                     </label>
-                    <a href="#" className="font-medium text-[#14F195] hover:underline">Forgot password?</a>
+                    <button onClick={switchToForgot} className="font-medium text-[#14F195] hover:underline">Forgot password?</button>
                 </div>
                 <button type="submit" className="w-full py-3 mt-2 px-4 bg-[#14F195] text-black font-bold rounded-lg text-center hover:bg-white transition-colors duration-300">
                     Sign In
@@ -161,7 +161,58 @@ const SignUpForm = ({ onSignup, switchToSignin }) => {
     )
 }
 
-const AuthModal = ({ children, onBackdropClick, show }) => (
+const ForgotPasswordForm = ({ onForgot, switchToSignin }) => {
+    const [email, setEmail] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // In a real app, you would trigger a password reset email here.
+        console.log('Password reset requested for:', email);
+        onForgot();
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="text-left">
+                <h1 className="text-3xl font-bold text-white">Reset <span className="text-[#14F195]">Password</span></h1>
+                <p className="mt-1 text-gray-400">Enter your email to receive a reset link.</p>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <AuthInputField label="Email" icon={MailIcon} type="email" placeholder="you@university.edu" value={email} onChange={(e) => setEmail(e.target.value)} name="email" />
+                <button type="submit" className="w-full py-3 mt-2 px-4 bg-[#14F195] text-black font-bold rounded-lg text-center hover:bg-white transition-colors duration-300">
+                    Send Reset Link
+                </button>
+            </form>
+            <p className="text-sm text-center text-gray-500">
+                Remember your password? <button onClick={switchToSignin} className="font-medium text-[#14F195] hover:underline">Sign In</button>
+            </p>
+        </div>
+    );
+};
+
+const ForgotConfirmation = ({ switchToSignin }) => (
+    <div className="space-y-6 text-center">
+        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+            <CheckCheckIcon className="w-8 h-8 text-green-400" />
+        </div>
+        <div>
+            <h1 className="text-3xl font-bold text-white">Check Your <span className="text-[#14F195]">Email</span></h1>
+            <p className="mt-2 text-gray-400">If an account exists for that email, we've sent instructions to reset your password.</p>
+        </div>
+        <button onClick={switchToSignin} className="w-full py-3 mt-2 px-4 bg-gray-700 text-white font-bold rounded-lg text-center hover:bg-gray-600 transition-colors duration-300">
+            Back to Sign In
+        </button>
+    </div>
+);
+
+
+interface AuthModalProps {
+    children: React.ReactNode;
+    onBackdropClick: (e: any) => void;
+    show: boolean;
+}
+
+const AuthModal: React.FC<AuthModalProps> = ({ children, onBackdropClick, show }) => (
     <AnimatePresence>
         {show && (
             <motion.div 
@@ -216,7 +267,6 @@ const Globe = () => {
               className="absolute"
               animate={{ rotateY: 360 }}
               transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-              // FIX: Corrected typo for transformStyle from 'preserve-d' to 'preserve-3d'.
               style={{ transformStyle: 'preserve-3d', width: '100%', height: '100%' }}
           >
               <div className="absolute inset-0 bg-[#14F195]/5 rounded-full blur-3xl"></div>
@@ -310,7 +360,7 @@ const AnimatedStatCard = ({ value: rawValue, label }) => {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, setCurrentPage }) => {
     const [showAuth, setShowAuth] = useState(false);
-    const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+    const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'forgot' | 'forgotConfirmation'>('signin');
 
     const openAuth = (mode: 'signin' | 'signup') => {
         setAuthMode(mode);
@@ -328,10 +378,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onSignup, setCurrent
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {authMode === 'signin' ? (
-                            <SignInForm onLogin={onLogin} switchToSignup={() => setAuthMode('signup')} />
-                        ) : (
+                        {authMode === 'signin' && (
+                            <SignInForm onLogin={onLogin} switchToSignup={() => setAuthMode('signup')} switchToForgot={() => setAuthMode('forgot')} />
+                        )}
+                        {authMode === 'signup' && (
                             <SignUpForm onSignup={onSignup} switchToSignin={() => setAuthMode('signin')} />
+                        )}
+                         {authMode === 'forgot' && (
+                            <ForgotPasswordForm onForgot={() => setAuthMode('forgotConfirmation')} switchToSignin={() => setAuthMode('signin')} />
+                        )}
+                        {authMode === 'forgotConfirmation' && (
+                            <ForgotConfirmation switchToSignin={() => setAuthMode('signin')} />
                         )}
                     </motion.div>
                 </AnimatePresence>
