@@ -6,14 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check-setup": "node scripts/check-setup.js"
   },
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "lucide-react": "^0.546.0",
     "framer-motion": "^12.23.24",
-    "@google/genai": "^1.27.0"
+    "@google/genai": "^1.27.0",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -11,7 +11,7 @@ type UserSignUpData = Omit<User, 'id' | 'avatarUrl' | 'followers' | 'following' 
 
 
 interface LandingPageProps {
-  onLogin: (email: string) => void;
+  onLogin: (email: string, password: string) => void;
   onSignup: (userData: UserSignUpData) => void;
   setCurrentPage: (page: Page) => void;
 }
@@ -42,7 +42,7 @@ const SignInForm = ({ onLogin, switchToSignup, switchToForgot }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (email) onLogin(email);
+        if (email && password) onLogin(email, password);
     };
 
     return (
